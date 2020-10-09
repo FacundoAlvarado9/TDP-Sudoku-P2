@@ -1,6 +1,10 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -39,6 +43,7 @@ public class FramePrincipal extends JFrame {
 	public FramePrincipal() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
+		setMinimumSize(new Dimension(800, 600));
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -62,7 +67,17 @@ public class FramePrincipal extends JFrame {
 		for(int f=0; f<tamanoSudoku; f++) {
 			for(int c=0; c<tamanoSudoku; c++) {
 				Celda cel = juego.getCelda(f, c);
+				
 				JLabel label = new JLabel(String.valueOf(cel.getValor()));
+				
+				label.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						cel.setValor(cel.getValor() + 1);
+						label.setText(String.valueOf(cel.getValor()));
+						label.repaint();
+					}
+				});			
 				
 				tableroPanel.add(label);
 				
