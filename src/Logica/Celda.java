@@ -14,4 +14,8 @@ public class Celda {
 	public void setValor(int nuevoValor) {
 		valor = nuevoValor;
 	}
+	
+	public void actualizarValor() {
+		valor = ((valor+1)%10);
+	}
 }

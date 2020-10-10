@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
@@ -6,16 +7,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import Logica.Celda;
 import Logica.Juego;
 
-public class FramePrincipal extends JFrame {
+public class GUI extends JFrame {
 
 	private JPanel contentPane;
 	private JPanel tableroPanel;
@@ -28,7 +32,7 @@ public class FramePrincipal extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					FramePrincipal frame = new FramePrincipal();
+					GUI frame = new GUI();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -40,7 +44,7 @@ public class FramePrincipal extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public FramePrincipal() {
+	public GUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		setMinimumSize(new Dimension(800, 600));
@@ -58,14 +62,16 @@ public class FramePrincipal extends JFrame {
 	
 	public void arrancarTableroPanel() {
 		tableroPanel = new JPanel();
+		tableroPanel.setBackground(Color.WHITE);
 		tableroPanel.setLayout(new GridLayout(9, 9));
 		
 		Juego juego = new Juego();
-		
+	
 		int tamanoSudoku = 9;
 		
 		for(int f=0; f<tamanoSudoku; f++) {
-			for(int c=0; c<tamanoSudoku; c++) {
+			for(int c=0; c<tamanoSudoku; c++) {		
+				
 				Celda cel = juego.getCelda(f, c);
 				
 				JLabel label = new JLabel(String.valueOf(cel.getValor()));
@@ -73,7 +79,7 @@ public class FramePrincipal extends JFrame {
 				label.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
-						cel.setValor(cel.getValor() + 1);
+						cel.actualizarValor();
 						label.setText(String.valueOf(cel.getValor()));
 						label.repaint();
 					}
@@ -82,17 +88,21 @@ public class FramePrincipal extends JFrame {
 				tableroPanel.add(label);
 				
 			}
-		}
+		}	
 	}
 	
 	public void arrancarPanelBotones() {
 		panelBotones = new JPanel();
 		panelBotones.setLayout(new BorderLayout());
 		
+		JLabel titulo = new JLabel("Bienvenido al sudoku");
+		
 		JLabel reloj = new JLabel("00:00");
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
 		
-		panelBotones.add(btnReiniciarJuego, BorderLayout.NORTH);
+		
+		panelBotones.add(titulo, BorderLayout.CENTER);
+		panelBotones.add(btnReiniciarJuego, BorderLayout.NORTH);		
 		panelBotones.add(reloj, BorderLayout.SOUTH);
 	}
 
