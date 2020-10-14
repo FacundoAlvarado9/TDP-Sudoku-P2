@@ -1,7 +1,10 @@
+package GUI;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -57,7 +60,7 @@ public class GUI extends JFrame {
 		arrancarPanelBotones();
 		
 		contentPane.add(tableroPanel, BorderLayout.CENTER);
-		contentPane.add(panelBotones, BorderLayout.EAST);
+		contentPane.add(panelBotones, BorderLayout.SOUTH);
 	}
 	
 	public void arrancarTableroPanel() {
@@ -75,6 +78,7 @@ public class GUI extends JFrame {
 				Celda cel = juego.getCelda(f, c);
 				
 				JLabel label = new JLabel(String.valueOf(cel.getValor()));
+				label.setFont(new Font("Serif", Font.BOLD, 16));
 				
 				label.addMouseListener(new MouseAdapter() {
 					@Override
@@ -93,17 +97,19 @@ public class GUI extends JFrame {
 	
 	public void arrancarPanelBotones() {
 		panelBotones = new JPanel();
-		panelBotones.setLayout(new BorderLayout());
+		panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
 		JLabel titulo = new JLabel("Bienvenido al sudoku");
 		
 		JLabel reloj = new JLabel("00:00");
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
+		JButton btnChequearSolucion = new JButton("Chequear solución");
 		
 		
-		panelBotones.add(titulo, BorderLayout.CENTER);
-		panelBotones.add(btnReiniciarJuego, BorderLayout.NORTH);		
-		panelBotones.add(reloj, BorderLayout.SOUTH);
+		panelBotones.add(titulo);
+		panelBotones.add(btnReiniciarJuego);
+		panelBotones.add(btnChequearSolucion);
+		panelBotones.add(reloj);
 	}
 
 }
