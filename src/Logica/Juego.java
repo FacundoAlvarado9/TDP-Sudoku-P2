@@ -9,16 +9,16 @@ public class Juego {
 	private static final String ARCHIVO_ORIGEN = "/home/facundo/devstuff/sudoku1.txt";
 	private Celda[][] tablero;
 	
-	private boolean[] auxNumerosEncontrados;
+	private int[] auxCantApariciones;
 	
 	private Random rand;
 	
 	public Juego() {
 		tablero = new Celda[TAMANO_TABLERO][TAMANO_TABLERO];
 		
-		auxNumerosEncontrados = new boolean[9];		
+		auxCantApariciones = new int[9];
 		for(int i=0; i<9; i++) {
-			auxNumerosEncontrados[i] = false;
+			auxCantApariciones[i] = 0;
 		}
 		
 	
@@ -40,7 +40,7 @@ public class Juego {
 	
 	private void refrescarAuxNumEncontrados() {
 		for(int i=0; i<9; i++) {
-			auxNumerosEncontrados[i] = false;
+			auxCantApariciones[i] = 0;
 		}
 	}
 	
@@ -69,7 +69,7 @@ public class Juego {
 			e.printStackTrace();
 		}
 		
-		testTablero();
+		//testTablero();
 		
 		
 	}
@@ -91,27 +91,34 @@ public class Juego {
 		return tablero[f][c].getValor();
 	}
 	
-	public void actualizarValorCelda(int f, int c, int v) {
-		tablero[f][c].setValor(v);
+	public void actualizarValorCelda(Celda c) {
+		c.actualizarValor();
 	}
 	
 	private boolean chequearFilas() {
 		boolean todasValidas = true;
 		int elem;
-		Celda celActual;
+		Celda celdaActual;
 		
 		for(int f=0; f<TAMANO_TABLERO; f++) {
 			
 			for(int c=0; c<TAMANO_TABLERO; c++) {				
-				celActual = tablero[f][c];
-				elem = celActual.getValor();
-				if(auxNumerosEncontrados[elem] == true) {
-					celActual.setValidez(false);
-					todasValidas = false;
-				} else {
-					auxNumerosEncontrados[elem] = true;
-				}				
+				celdaActual = tablero[f][c];
+				elem = celdaActual.getValor();
+				if(elem != 0){
+					auxCantApariciones[elem - 1]++;
+				}
 			}
+
+			for(int c=0; c<TAMANO_TABLERO; c++) {
+				celdaActual = tablero[f][c];
+				elem = celdaActual.getValor();
+				if(elem != 0 && auxCantApariciones[elem-1]>1){
+					celdaActual.setValidez(false);
+					todasValidas = false;
+				}
+			}
+
 			refrescarAuxNumEncontrados();
 		}
 		
@@ -121,20 +128,27 @@ public class Juego {
 	private boolean chequearColumnas() {
 		boolean todasValidas = true;
 		int elem;
-		Celda celActual;
+		Celda celdaActual;
 		
 		for(int c=0; c<TAMANO_TABLERO; c++) {
+
 			for(int f=0; f<TAMANO_TABLERO; f++) {
-				
-				celActual = tablero[f][c];
-				elem = celActual.getValor();
-				if(auxNumerosEncontrados[elem] == true) {
-					celActual.setValidez(false);
-					todasValidas = false;
-				} else {
-					auxNumerosEncontrados[elem] = true;				
-				}							
+				celdaActual = tablero[f][c];
+				elem = celdaActual.getValor();
+				if(elem != 0) {
+					auxCantApariciones[elem-1]++;
+				}
 			}
+
+			for(int f=0; f<TAMANO_TABLERO; f++) {
+				celdaActual = tablero[f][c];
+				elem = celdaActual.getValor();
+				if(elem == 0 || auxCantApariciones[elem-1] > 1) {
+					celdaActual.setValidez(false);
+					todasValidas = false;
+				}
+			}
+
 			refrescarAuxNumEncontrados();
 		}
 		
@@ -143,14 +157,67 @@ public class Juego {
 	
 	private boolean chequearCuadrantes() {
 		boolean todosValidos = true;
+		boolean esValidoCuadranteActual;
+
+		for(int i=0; i<3; i++){
+			for(int j=0; j<3; j++){
+				esValidoCuadranteActual = chequearCuadrante(i, j);
+				todosValidos = todosValidos & esValidoCuadranteActual;
+			}
+		}
 		
 		return todosValidos;
+	}
+
+	//Recordemos cuadrante 3x3
+	// 0,0 / 0,1 / 0,2
+	// 1,0 / 1,1 / 1,2
+	// 2,0 / 2,1 / 2,2
+	private boolean chequearCuadrante(int f, int c){
+		boolean todasValidas = true;
+		Celda celdaActual;
+		int elem;
+		int topeFila = 3*(f+1);
+		int topeColumna = 3*(c+1);
+
+		for(int indiceF = 3*f; indiceF<topeFila; indiceF++){
+			for(int indiceC = 3*c; indiceC<topeColumna; indiceC++){
+				celdaActual = tablero[indiceF][indiceC];
+				elem = celdaActual.getValor();
+				if(elem != 0) {
+					auxCantApariciones[elem-1]++;
+				}
+			}
+		}
+
+		for(int indiceF = 3*f; indiceF<topeFila; indiceF++){
+			for(int indiceC = 3*c; indiceC<topeColumna; indiceC++){
+				celdaActual = tablero[indiceF][indiceC];
+				elem = celdaActual.getValor();
+				if(elem == 0 || auxCantApariciones[elem-1] > 1) {
+					celdaActual.setValidez(false);
+					todasValidas = false;
+				}
+			}
+		}
+
+		refrescarAuxNumEncontrados();
+		return todasValidas;
+	}
+
+	private void refrescarValidezCeldas(){
+		for(int f=0; f<TAMANO_TABLERO; f++){
+			for(int c=0; c<TAMANO_TABLERO; c++){
+				tablero[f][c].setValidez(true);
+			}
+		}
 	}
 	
 	
 	
 	public boolean gano() {
-		return chequearFilas() && chequearColumnas() && chequearCuadrantes();
+		refrescarValidezCeldas();
+		return chequearFilas() & chequearColumnas() & chequearCuadrantes();
 	}
 	
 }

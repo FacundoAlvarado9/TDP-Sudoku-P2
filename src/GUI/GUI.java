@@ -1,22 +1,8 @@
 package GUI;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import Logica.Celda;
@@ -27,6 +13,8 @@ public class GUI extends JFrame {
 	private JPanel contentPane;
 	private JPanel tableroPanel;
 	private JPanel panelBotones;
+	
+	private Juego juego;
 
 	/**
 	 * Launch the application.
@@ -66,9 +54,22 @@ public class GUI extends JFrame {
 	public void arrancarTableroPanel() {
 		tableroPanel = new JPanel();
 		tableroPanel.setBackground(Color.WHITE);
-		tableroPanel.setLayout(new GridLayout(9, 9));
+		tableroPanel.setLayout(new GridLayout(3, 3));
 		
-		Juego juego = new Juego();
+		JPanel subPanel[][] = new JPanel[3][3];
+
+		for(int f=0; f<3; f++){
+			for(int c=0; c<3; c++){
+				subPanel[f][c] = new JPanel();
+				subPanel[f][c].setLayout(new GridLayout(3, 3));
+				subPanel[f][c].setBackground(Color.WHITE);
+				subPanel[f][c].setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+				//subPanel[f][c].add(new JLabel("Hola soy panel f:" +  f + " c: " + c));
+				tableroPanel.add(subPanel[f][c]);
+			}
+		}
+		
+		juego = new Juego();
 	
 		int tamanoSudoku = 9;
 		
@@ -76,23 +77,56 @@ public class GUI extends JFrame {
 			for(int c=0; c<tamanoSudoku; c++) {		
 				
 				Celda cel = juego.getCelda(f, c);
-				
-				JLabel label = new JLabel(String.valueOf(cel.getValor()));
-				label.setFont(new Font("Serif", Font.BOLD, 16));
+				ImageIcon grafico = cel.getGrafico().getGrafico();
+				LabelTablero label = new LabelTablero(cel);
+
+				label.addComponentListener(new ComponentAdapter() {
+					@Override
+					public void componentResized(ComponentEvent e) {
+						redimensionar(label, grafico);
+						label.setIcon(grafico);
+					}
+				});
 				
 				label.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
-						cel.actualizarValor();
-						label.setText(String.valueOf(cel.getValor()));
-						label.repaint();
+						juego.actualizarValorCelda(cel);
+						redimensionar(label, grafico);
 					}
-				});			
-				
-				tableroPanel.add(label);
-				
+				});
+
+				//tableroPanel.add(label);
+				int filaSubPanel, colSubPanel;
+				if(f<3){
+					filaSubPanel = 0;
+				} else if(f<6){
+					filaSubPanel = 1;
+				} else{
+					filaSubPanel = 2;
+				}
+
+				if(c<3){
+					colSubPanel = 0;
+				} else if(c<6){
+					colSubPanel = 1;
+				} else{
+					colSubPanel = 2;
+				}
+
+				subPanel[filaSubPanel][colSubPanel].add(label);
+
 			}
 		}	
+	}
+
+	private void redimensionar(LabelTablero label, ImageIcon grafico){
+		Image imagen = grafico.getImage();
+		if(imagen != null){
+			Image newImg = imagen.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_DEFAULT);
+			grafico.setImage(newImg);
+			label.repaint();
+		}
 	}
 	
 	public void arrancarPanelBotones() {
@@ -104,6 +138,39 @@ public class GUI extends JFrame {
 		JLabel reloj = new JLabel("00:00");
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
 		JButton btnChequearSolucion = new JButton("Chequear solución");
+		
+		btnChequearSolucion.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+
+				if(juego.gano()) {
+					JOptionPane.showMessageDialog(null, "Ganó!");
+				}
+
+				for(Component c : tableroPanel.getComponents()) {
+					JPanel subPanel = (JPanel) c;
+
+					for(Component label : subPanel.getComponents()){
+						LabelTablero labelCelda = (LabelTablero) label;
+
+						if(!labelCelda.getCeldaAsociada().esValida()) {
+							labelCelda.setBackground(Color.RED);
+						} else{
+							labelCelda.setBackground(Color.WHITE);
+						}
+						labelCelda.setOpaque(true);
+						labelCelda.repaint();
+					}
+
+				}
+
+
+				
+
+			}
+		});
 		
 		
 		panelBotones.add(titulo);

@@ -3,6 +3,7 @@ package Logica;
 public class Celda {
 	
 	private int valor;
+	private Grafico img;
 	private boolean validez;
 	
 	//Los cuadrantes se numeran por fila, de izq a der,
@@ -16,6 +17,9 @@ public class Celda {
 	
 	public Celda(int numEnCelda) {
 		this.valor = numEnCelda;
+		this.img = new Grafico(numEnCelda);
+		img.actualizar(numEnCelda);
+		validez = true;
 	}
 	
 	public int getValor() {
@@ -24,6 +28,10 @@ public class Celda {
 	
 	public void setValor(int nuevoValor) {
 		valor = nuevoValor;
+	}
+
+	public Grafico getGrafico(){
+		return this.img;
 	}
 	
 	public boolean esValida() {
@@ -36,5 +44,6 @@ public class Celda {
 	
 	public void actualizarValor() {
 		valor = ((valor+1)%10);
+		this.img.actualizar(valor);
 	}
 }
