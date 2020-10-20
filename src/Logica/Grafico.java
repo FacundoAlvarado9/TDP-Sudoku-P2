@@ -9,7 +9,6 @@ public class Grafico {
 
     public Grafico(int numCelda){
         this.grafico = new ImageIcon(this.getClass().getResource("/img/0" + numCelda + ".png"));
-        System.out.println("/img/0" + numCelda + ".png");
     }
 
     public void actualizar(int num){

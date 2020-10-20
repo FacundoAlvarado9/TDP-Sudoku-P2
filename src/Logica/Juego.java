@@ -1,5 +1,6 @@
 package Logica;
 
+import java.time.LocalTime;
 import java.util.Random;
 import java.io.*;
 
@@ -7,7 +8,11 @@ public class Juego {
 		
 	private static final int TAMANO_TABLERO = 9;
 	private static final String ARCHIVO_ORIGEN = "/home/facundo/devstuff/sudoku1.txt";
+
 	private Celda[][] tablero;
+
+	private LocalTime horaComienzo;
+	private LocalTime horaFinal;
 	
 	private int[] auxCantApariciones;
 	
@@ -24,7 +29,10 @@ public class Juego {
 	
 		rand = new Random();
 		
-		iniciarJuego();
+		cargarTablero();
+
+		horaComienzo = LocalTime.now();
+
 		
 		/*
 		//Inicializo los valores del tablero
@@ -44,7 +52,7 @@ public class Juego {
 		}
 	}
 	
-	private void iniciarJuego() {
+	private void cargarTablero() {
 		String[] lineaNum;
 		int fila = 0;
 		
@@ -68,9 +76,7 @@ public class Juego {
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
-		
-		//testTablero();
-		
+
 		
 	}
 	

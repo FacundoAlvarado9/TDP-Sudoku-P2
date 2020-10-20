@@ -16,6 +16,14 @@ public class GUI extends JFrame {
 	
 	private Juego juego;
 
+	private int segundosPasados = 0;
+	private int horas = 0;
+	private int min = 0;
+	private int seg = 0;
+	private String relojString = String.format("%02d:%02d:%02d", horas, min, seg);
+
+
+
 	/**
 	 * Launch the application.
 	 */
@@ -39,6 +47,7 @@ public class GUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		setMinimumSize(new Dimension(800, 600));
+		setTitle("Sudoku");
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -135,7 +144,21 @@ public class GUI extends JFrame {
 		
 		JLabel titulo = new JLabel("Bienvenido al sudoku");
 		
-		JLabel reloj = new JLabel("00:00");
+		JLabel relojLabel = new JLabel("88:88:88");
+
+		Timer timer = new Timer(1000, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				segundosPasados = segundosPasados+ 1000;
+				horas = (segundosPasados/3600000);
+				min = (segundosPasados/60000) % 60;
+				seg = (segundosPasados/1000) % 60;
+				relojString = String.format("%02d:%02d:%02d", horas, min, seg);
+				relojLabel.setText(relojString);
+			}
+		});
+		timer.start();
+
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
 		JButton btnChequearSolucion = new JButton("Chequear solución");
 		
@@ -176,7 +199,7 @@ public class GUI extends JFrame {
 		panelBotones.add(titulo);
 		panelBotones.add(btnReiniciarJuego);
 		panelBotones.add(btnChequearSolucion);
-		panelBotones.add(reloj);
+		panelBotones.add(relojLabel);
 	}
 
 }
