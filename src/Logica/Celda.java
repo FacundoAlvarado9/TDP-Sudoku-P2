@@ -18,7 +18,6 @@ public class Celda {
 	public Celda(int numEnCelda) {
 		this.valor = numEnCelda;
 		this.img = new Grafico(numEnCelda);
-		img.actualizar(numEnCelda);
 		validez = true;
 	}
 	

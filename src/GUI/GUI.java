@@ -1,6 +1,7 @@
 package GUI;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.Duration;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,15 +13,11 @@ public class GUI extends JFrame {
 
 	private JPanel contentPane;
 	private JPanel tableroPanel;
+	private JPanel[][] subPanel;
 	private JPanel panelBotones;
 	
 	private Juego juego;
-
-	private int segundosPasados = 0;
-	private int horas = 0;
-	private int min = 0;
-	private int seg = 0;
-	private String relojString = String.format("%02d:%02d:%02d", horas, min, seg);
+	private boolean estanCeldasMarcadas;
 
 
 
@@ -47,89 +44,90 @@ public class GUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		setMinimumSize(new Dimension(800, 600));
-		setTitle("Sudoku");
+		setTitle("Sudoku by Facundo Alvarado");
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		arrancarTableroPanel();
-		arrancarPanelBotones();
+		inicializarTableroPanel();
+		inicializarPanelBotones();
 		
 		contentPane.add(tableroPanel, BorderLayout.CENTER);
 		contentPane.add(panelBotones, BorderLayout.SOUTH);
 	}
-	
-	public void arrancarTableroPanel() {
-		tableroPanel = new JPanel();
-		tableroPanel.setBackground(Color.WHITE);
-		tableroPanel.setLayout(new GridLayout(3, 3));
-		
-		JPanel subPanel[][] = new JPanel[3][3];
 
+	public void inicializarSubPaneles(){
+		subPanel = new JPanel[3][3];
 		for(int f=0; f<3; f++){
 			for(int c=0; c<3; c++){
 				subPanel[f][c] = new JPanel();
 				subPanel[f][c].setLayout(new GridLayout(3, 3));
 				subPanel[f][c].setBackground(Color.WHITE);
 				subPanel[f][c].setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
-				//subPanel[f][c].add(new JLabel("Hola soy panel f:" +  f + " c: " + c));
 				tableroPanel.add(subPanel[f][c]);
 			}
 		}
+	}
+
+	private int computarFilaOColumnaSubPanel(int fc){
+		int fcSubPanel;
+		if(fc<3){
+			fcSubPanel = 0;
+		} else if(fc<6){
+			fcSubPanel = 1;
+		} else{
+			fcSubPanel = 2;
+		}
+		return fcSubPanel;
+	}
+	
+	public void inicializarTableroPanel() {
+		tableroPanel = new JPanel();
+		tableroPanel.setBackground(Color.WHITE);
+		tableroPanel.setLayout(new GridLayout(3, 3));
+
+		inicializarSubPaneles();
 		
 		juego = new Juego();
-	
-		int tamanoSudoku = 9;
-		
-		for(int f=0; f<tamanoSudoku; f++) {
-			for(int c=0; c<tamanoSudoku; c++) {		
-				
-				Celda cel = juego.getCelda(f, c);
-				ImageIcon grafico = cel.getGrafico().getGrafico();
-				LabelTablero label = new LabelTablero(cel);
 
-				label.addComponentListener(new ComponentAdapter() {
+		for(int fila=0; fila<9; fila++) {
+			for(int col=0; col<9; col++) {
+				
+				Celda cel = juego.getCelda(fila, col);
+				ImageIcon grafico = cel.getGrafico().getImagen();
+				LabelCelda labelCelda = new LabelCelda(cel);
+				labelCelda.setOpaque(true);
+
+				labelCelda.addComponentListener(new ComponentAdapter() {
 					@Override
 					public void componentResized(ComponentEvent e) {
-						redimensionar(label, grafico);
-						label.setIcon(grafico);
+						redimensionar(labelCelda, grafico);
+						labelCelda.setIcon(grafico);
 					}
 				});
 				
-				label.addMouseListener(new MouseAdapter() {
+				labelCelda.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
+						if(estanCeldasMarcadas) {
+							desmarcarCeldasInvalidas();
+						}
 						juego.actualizarValorCelda(cel);
-						redimensionar(label, grafico);
+						redimensionar(labelCelda, grafico);
 					}
 				});
 
-				//tableroPanel.add(label);
-				int filaSubPanel, colSubPanel;
-				if(f<3){
-					filaSubPanel = 0;
-				} else if(f<6){
-					filaSubPanel = 1;
-				} else{
-					filaSubPanel = 2;
-				}
+				int filaSubPanel = computarFilaOColumnaSubPanel(fila);
+				int colSubPanel = computarFilaOColumnaSubPanel(col);
 
-				if(c<3){
-					colSubPanel = 0;
-				} else if(c<6){
-					colSubPanel = 1;
-				} else{
-					colSubPanel = 2;
-				}
-
-				subPanel[filaSubPanel][colSubPanel].add(label);
+				subPanel[filaSubPanel][colSubPanel].add(labelCelda);
 
 			}
 		}	
 	}
 
-	private void redimensionar(LabelTablero label, ImageIcon grafico){
+	private void redimensionar(LabelCelda label, ImageIcon grafico){
 		Image imagen = grafico.getImage();
 		if(imagen != null){
 			Image newImg = imagen.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_DEFAULT);
@@ -137,69 +135,92 @@ public class GUI extends JFrame {
 			label.repaint();
 		}
 	}
-	
-	public void arrancarPanelBotones() {
-		panelBotones = new JPanel();
-		panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER));
-		
-		JLabel titulo = new JLabel("Bienvenido al sudoku");
-		
-		JLabel relojLabel = new JLabel("88:88:88");
 
-		Timer timer = new Timer(1000, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				segundosPasados = segundosPasados+ 1000;
-				horas = (segundosPasados/3600000);
-				min = (segundosPasados/60000) % 60;
-				seg = (segundosPasados/1000) % 60;
-				relojString = String.format("%02d:%02d:%02d", horas, min, seg);
-				relojLabel.setText(relojString);
+	/**
+	 * Reestablece el fondo blanco de las celdas del tablero.
+	 */
+	private void desmarcarCeldasInvalidas(){
+		for(Component c : tableroPanel.getComponents()) {
+			JPanel subPanel = (JPanel) c;
+
+			for(Component label : subPanel.getComponents()){
+				LabelCelda labelCelda = (LabelCelda) label;
+
+				labelCelda.setBackground(Color.WHITE);
+
+				labelCelda.setOpaque(true);
+				labelCelda.repaint();
 			}
-		});
-		timer.start();
+
+			estanCeldasMarcadas = false;
+		}
+	}
+
+	/**
+	 * Establece un fondo rojo para las celdas invalidas.
+	 * Las celdas invalidas son aquellas que no cumplen las condiciones
+	 * de un juego ganado.
+	 */
+	public void marcarCeldasInvalidas(){
+		for(Component compSubPanel : tableroPanel.getComponents()) {
+			JPanel subPanel = (JPanel) compSubPanel;
+
+			for(Component label : subPanel.getComponents()){
+				LabelCelda labelCelda = (LabelCelda) label;
+
+				if(!labelCelda.getCeldaAsociada().esValida()) {
+					labelCelda.setBackground(Color.RED);
+					estanCeldasMarcadas = true;
+				} else{
+					labelCelda.setBackground(Color.WHITE);
+				}
+
+				labelCelda.repaint();
+			}
+		}
+	}
+	
+	public void inicializarPanelBotones() {
+		panelBotones = new JPanel();
+		panelBotones.setLayout(new FlowLayout());
+
+		JLabel mensajeSaludo = new JLabel("Bienvenido al sudoku");
+		//CronometroGUI cronometro = new CronometroGUI(juego.getTimeInicio());
+		CronometroGUI2 cronometro = new CronometroGUI2(juego.getTimeInicio());
 
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
 		JButton btnChequearSolucion = new JButton("Chequear solución");
 		
 		btnChequearSolucion.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
 
+			@Override
+			public void actionPerformed(ActionEvent ae) {
 
 				if(juego.gano()) {
-					JOptionPane.showMessageDialog(null, "Ganó!");
-				}
+					Duration d = cronometro.parar();
 
-				for(Component c : tableroPanel.getComponents()) {
-					JPanel subPanel = (JPanel) c;
+					String hora_ = String.format("%02d:%02d:%02d",
+							d.toHours(),
+							d.toMinutesPart(),
+							d.toSecondsPart());
 
-					for(Component label : subPanel.getComponents()){
-						LabelTablero labelCelda = (LabelTablero) label;
-
-						if(!labelCelda.getCeldaAsociada().esValida()) {
-							labelCelda.setBackground(Color.RED);
-						} else{
-							labelCelda.setBackground(Color.WHITE);
-						}
-						labelCelda.setOpaque(true);
-						labelCelda.repaint();
-					}
-
+					JOptionPane.showMessageDialog(null,
+							"¡Ganó! En una duración de juego de " + hora_,
+							"¡Ganaste!",
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					marcarCeldasInvalidas();
 				}
 
 
-				
 
 			}
 		});
 		
-		
-		panelBotones.add(titulo);
+		panelBotones.add(mensajeSaludo);
 		panelBotones.add(btnReiniciarJuego);
 		panelBotones.add(btnChequearSolucion);
-		panelBotones.add(relojLabel);
+		panelBotones.add(cronometro);
 	}
 
 }

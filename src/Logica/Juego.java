@@ -55,6 +55,7 @@ public class Juego {
 	private void cargarTablero() {
 		String[] lineaNum;
 		int fila = 0;
+		int numAInsertarEnCelda;
 		
 		//Llenamos el tablero de los digitos en el archivo de texto
 		try {			
@@ -66,7 +67,13 @@ public class Juego {
 				lineaNum = str.split(" ");
 				
 				for(int i=0; i<9; i++) {
-					tablero[fila][i] = new Celda(Integer.valueOf(lineaNum[i]));
+					//
+					if(false){
+						numAInsertarEnCelda = 0;
+					} else{
+						numAInsertarEnCelda = Integer.valueOf(lineaNum[i]);
+					}
+					tablero[fila][i] = new Celda(numAInsertarEnCelda);
 				}
 				
 				fila++;
@@ -222,8 +229,19 @@ public class Juego {
 	
 	
 	public boolean gano() {
-		refrescarValidezCeldas();
-		return chequearFilas() & chequearColumnas() & chequearCuadrantes();
+		boolean gano;
+		refrescarValidezCeldas(); //Marco todas las celdas como validas, para deshacer chequeos anteriores.
+		//No hace "y" exclusivo porque realizo todos los chequeos, siempre, para marcar todas las celdas invalidas.
+		gano = chequearFilas() & chequearColumnas() & chequearCuadrantes();
+
+		if(gano){
+			horaFinal = LocalTime.now();
+		}
+
+		return gano;
 	}
-	
+
+	public LocalTime getTimeInicio() {
+		return horaComienzo;
+	}
 }

@@ -4,11 +4,11 @@ import javax.swing.*;
 
 import Logica.Celda;
 
-public class LabelTablero extends JLabel{
+public class LabelCelda extends JLabel{
 	
 	private Celda celdaAsociada;
 	
-	public LabelTablero(Celda cel) {
+	public LabelCelda(Celda cel) {
 		super();
 		celdaAsociada = cel;
 	}
