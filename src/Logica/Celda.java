@@ -24,10 +24,6 @@ public class Celda {
 	public int getValor() {
 		return valor;
 	}
-	
-	public void setValor(int nuevoValor) {
-		valor = nuevoValor;
-	}
 
 	public Grafico getGrafico(){
 		return this.img;

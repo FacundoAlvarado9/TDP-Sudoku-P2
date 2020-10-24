@@ -15,8 +15,12 @@ public class GUI extends JFrame {
 	private JPanel tableroPanel;
 	private JPanel[][] subPanel;
 	private JPanel panelBotones;
+	private JPanel panelCronometro2;
+
+	private PanelCronometro panelCronometro;
 	
 	private Juego juego;
+	private CronometroGUI cronometro;
 	private boolean estanCeldasMarcadas;
 
 
@@ -49,13 +53,20 @@ public class GUI extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+
+		juego = new Juego();
 		
 		inicializarTableroPanel();
+
+		panelCronometro = new PanelCronometro(juego.getTimeInicio());
+
 		inicializarPanelBotones();
 		
 		contentPane.add(tableroPanel, BorderLayout.CENTER);
+		contentPane.add(panelCronometro, BorderLayout.NORTH);
 		contentPane.add(panelBotones, BorderLayout.SOUTH);
 	}
+
 
 	public void inicializarSubPaneles(){
 		subPanel = new JPanel[3][3];
@@ -88,8 +99,6 @@ public class GUI extends JFrame {
 		tableroPanel.setLayout(new GridLayout(3, 3));
 
 		inicializarSubPaneles();
-		
-		juego = new Juego();
 
 		for(int fila=0; fila<9; fila++) {
 			for(int col=0; col<9; col++) {
@@ -185,8 +194,6 @@ public class GUI extends JFrame {
 		panelBotones.setLayout(new FlowLayout());
 
 		JLabel mensajeSaludo = new JLabel("Bienvenido al sudoku");
-		//CronometroGUI cronometro = new CronometroGUI(juego.getTimeInicio());
-		CronometroGUI2 cronometro = new CronometroGUI2(juego.getTimeInicio());
 
 		JButton btnReiniciarJuego = new JButton("Reiniciar");
 		JButton btnChequearSolucion = new JButton("Chequear solución");
@@ -216,11 +223,10 @@ public class GUI extends JFrame {
 
 			}
 		});
-		
+
 		panelBotones.add(mensajeSaludo);
 		panelBotones.add(btnReiniciarJuego);
 		panelBotones.add(btnChequearSolucion);
-		panelBotones.add(cronometro);
 	}
 
 }

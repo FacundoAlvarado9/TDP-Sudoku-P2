@@ -1,13 +1,13 @@
-package Logica;
+package GUI;
 
 import javax.swing.*;
 
-public class Grafico {
+public class GraficoCronometro {
 
     private ImageIcon imagen;
 
-    public Grafico(int numCelda){
-        this.imagen = new ImageIcon(this.getClass().getResource("/img/celdas/0" + numCelda + ".png"));
+    public GraficoCronometro(int digito){
+        this.imagen = new ImageIcon(this.getClass().getResource("/img/cronometro/0" + digito + ".png"));
     }
 
     public void actualizar(int num){
@@ -20,4 +20,5 @@ public class Grafico {
     public ImageIcon getImagen(){
         return imagen;
     }
+
 }
