@@ -69,8 +69,10 @@ public class Juego {
 		//Llenamos el tablero de los digitos en el archivo de texto
 		try {
 
-			FileReader fr = new FileReader("src/resources/fuente_juego.txt");
-			BufferedReader br = new BufferedReader(fr);			
+			//Abro el archivo con el buffered reader a partir de la carpeta de recursos del proyecto.
+			BufferedReader br = new BufferedReader(new
+					InputStreamReader(getClass().getClassLoader().getResourceAsStream("fuente_juego.txt")));
+
 			String str;
 			
 			while((str = br.readLine()) != null) {
