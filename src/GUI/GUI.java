@@ -6,6 +6,7 @@ import java.time.Duration;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import GUI.Cronometro.Cronometro;
 import Logica.Celda;
 import Logica.Juego;
 
@@ -15,15 +16,15 @@ public class GUI extends JFrame {
 	private JPanel tableroPanel;
 	private JPanel[][] subPanel;
 	private JPanel panelBotones;
-	private JPanel panelCronometro2;
 
-	private PanelCronometro panelCronometro;
+	private JButton btnChequearSolucion;
+	private JButton btnIniciarFinalizarJuego;
+	private JLabel estadoDelJuego;
+
+	private Cronometro cronometro;
 	
 	private Juego juego;
-	private CronometroGUI cronometro;
 	private boolean estanCeldasMarcadas;
-
-
 
 	/**
 	 * Launch the application.
@@ -54,21 +55,38 @@ public class GUI extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
-		juego = new Juego();
-		
+
+
+		cronometro = new Cronometro();
+
 		inicializarTableroPanel();
 
-		panelCronometro = new PanelCronometro(juego.getTimeInicio());
-
 		inicializarPanelBotones();
-		
+
 		contentPane.add(tableroPanel, BorderLayout.CENTER);
-		contentPane.add(panelCronometro, BorderLayout.NORTH);
+		contentPane.add(cronometro, BorderLayout.NORTH);
+		//contentPane.add(panelCronometro2, BorderLayout.NORTH);
 		contentPane.add(panelBotones, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Inicializa el tablero (gráfico) del juego. Si el juego no está iniciado,
+	 * solo inicializa los subpaneles 3x3 del sudoku.
+	 */
+	private void inicializarTableroPanel() {
+		tableroPanel = new JPanel();
+		tableroPanel.setMinimumSize(new Dimension(500, 500));
+		tableroPanel.setBackground(Color.WHITE);
+		tableroPanel.setLayout(new GridLayout(3, 3));
 
-	public void inicializarSubPaneles(){
+		inicializarSubPaneles();
+
+	}
+
+	/**
+	 * Inicializa los subpaneles 3x3 del Sudoku, y los añade al panel del Tablero.
+	 */
+	private void inicializarSubPaneles(){
 		subPanel = new JPanel[3][3];
 		for(int f=0; f<3; f++){
 			for(int c=0; c<3; c++){
@@ -81,6 +99,95 @@ public class GUI extends JFrame {
 		}
 	}
 
+	/**
+	 * Inicializa el panel inferior de la ventana, que contiene los botones que controlan
+	 * el juego. Boton 'Iniciar/Finalizar' juego, y Boton 'Chequear Solución'
+	 */
+	private void inicializarPanelBotones() {
+		panelBotones = new JPanel();
+		panelBotones.setLayout(new FlowLayout());
+
+		estadoDelJuego = new JLabel("No estás jugando, inicia un juego con el botón ->");
+
+		btnIniciarFinalizarJuego = new JButton("Iniciar juego");
+		btnChequearSolucion = new JButton("Chequear solución");
+
+		btnIniciarFinalizarJuego.setEnabled(true);
+		btnChequearSolucion.setEnabled(false);
+
+		btnIniciarFinalizarJuego.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				iniciarJuego();
+				btnIniciarFinalizarJuego.setEnabled(false);
+				btnChequearSolucion.setEnabled(true);
+			}
+		});
+
+		btnChequearSolucion.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+
+				if(juego.gano()) {
+					finalizarJuego();
+				} else {
+					marcarCeldasInvalidas();
+				}
+
+			}
+		});
+
+		panelBotones.add(estadoDelJuego);
+		panelBotones.add(btnIniciarFinalizarJuego);
+		panelBotones.add(btnChequearSolucion);
+	}
+
+	/**
+	 * Inicializa una partida de Sudoku incluyendo los componentes gráficos: crea las celdas, les añade
+	 * un chequeo de marcado de celdas inválidas, y añade cada celda a su panel correspondiente.
+	 */
+	private void iniciarJuego(){
+
+		juego = new Juego();
+
+		//Para cada fila y columna del tablero gráfico
+		for(int fila=0; fila<9; fila++) {
+			for(int col=0; col<9; col++) {
+
+				Celda cel = juego.getCelda(fila, col); //Recupera la celda del juego correspondiente
+				ImageIcon grafico = cel.getGrafico().getImagen();
+
+				LabelCelda labelCelda = new LabelCelda(cel); //Inicializa una celda gráfica en la GUI
+
+				//A la hora de actualizar la celda, chequea el marcado gráfico de celdas invalidas. Si están marcadas,
+				//las desmarca.
+				labelCelda.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						if(estanCeldasMarcadas){
+							desmarcarCeldasInvalidas();
+						}
+					}
+				});
+
+				int filaSubPanel = computarFilaOColumnaSubPanel(fila);
+				int colSubPanel = computarFilaOColumnaSubPanel(col);
+
+				subPanel[filaSubPanel][colSubPanel].add(labelCelda);
+
+			}
+		}
+		tableroPanel.revalidate();
+		cronometro.arrancar(juego.getTimeInicio());
+
+		estadoDelJuego.setText("Juego en curso ");
+	}
+
+	/**
+	 * Calcula la fila o columna del subpanel al que pertenece una celda.
+	 * @param fc fila o columna de la celda a computar su subpanel
+	 * @return fila o columna del subpanel correspondiente.
+	 */
 	private int computarFilaOColumnaSubPanel(int fc){
 		int fcSubPanel;
 		if(fc<3){
@@ -92,57 +199,28 @@ public class GUI extends JFrame {
 		}
 		return fcSubPanel;
 	}
-	
-	public void inicializarTableroPanel() {
-		tableroPanel = new JPanel();
-		tableroPanel.setBackground(Color.WHITE);
-		tableroPanel.setLayout(new GridLayout(3, 3));
 
-		inicializarSubPaneles();
 
-		for(int fila=0; fila<9; fila++) {
-			for(int col=0; col<9; col++) {
-				
-				Celda cel = juego.getCelda(fila, col);
-				ImageIcon grafico = cel.getGrafico().getImagen();
-				LabelCelda labelCelda = new LabelCelda(cel);
-				labelCelda.setOpaque(true);
+	/**
+	 * Establece un fondo rojo para las celdas invalidas.
+	 * Las celdas invalidas son aquellas que no cumplen las condiciones
+	 * de un juego ganado.
+	 */
+	private void marcarCeldasInvalidas(){
+		for(Component compSubPanel : tableroPanel.getComponents()) {
+			JPanel subPanel = (JPanel) compSubPanel;
 
-				labelCelda.addComponentListener(new ComponentAdapter() {
-					@Override
-					public void componentResized(ComponentEvent e) {
-						redimensionar(labelCelda, grafico);
-						labelCelda.setIcon(grafico);
-					}
-				});
-				
-				labelCelda.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						if(estanCeldasMarcadas) {
-							desmarcarCeldasInvalidas();
-						}
-						juego.actualizarValorCelda(cel);
-						redimensionar(labelCelda, grafico);
-					}
-				});
+			//Para cada celda de cada subpanel
+			for(Component label : subPanel.getComponents()){
+				LabelCelda labelCelda = (LabelCelda) label;
 
-				int filaSubPanel = computarFilaOColumnaSubPanel(fila);
-				int colSubPanel = computarFilaOColumnaSubPanel(col);
-
-				subPanel[filaSubPanel][colSubPanel].add(labelCelda);
-
+				//Si su celda asociada es inválida (no permite la resolución del juego),
+				//marcarla gráficamente (ver clase LabelCelda).
+				labelCelda.chequearYMarcarDeSerNecesario();
+				labelCelda.repaint();
 			}
-		}	
-	}
-
-	private void redimensionar(LabelCelda label, ImageIcon grafico){
-		Image imagen = grafico.getImage();
-		if(imagen != null){
-			Image newImg = imagen.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_DEFAULT);
-			grafico.setImage(newImg);
-			label.repaint();
 		}
+		estanCeldasMarcadas = true;
 	}
 
 	/**
@@ -155,9 +233,7 @@ public class GUI extends JFrame {
 			for(Component label : subPanel.getComponents()){
 				LabelCelda labelCelda = (LabelCelda) label;
 
-				labelCelda.setBackground(Color.WHITE);
-
-				labelCelda.setOpaque(true);
+				labelCelda.desmarcar();
 				labelCelda.repaint();
 			}
 
@@ -166,67 +242,43 @@ public class GUI extends JFrame {
 	}
 
 	/**
-	 * Establece un fondo rojo para las celdas invalidas.
-	 * Las celdas invalidas son aquellas que no cumplen las condiciones
-	 * de un juego ganado.
+	 * Muestra un dialogo felicitando al ganador e inhabilita las celdas
+	 * del sudoku, cambiando su fondo a un color gris oscuro.
 	 */
-	public void marcarCeldasInvalidas(){
-		for(Component compSubPanel : tableroPanel.getComponents()) {
-			JPanel subPanel = (JPanel) compSubPanel;
+	private void finalizarJuego() {
+
+		//Se muestra un dialogo felicitando al jugador, junto con el tiempo de juego.
+		Duration d = cronometro.parar();
+
+		String duracionJuego = String.format("%02d:%02d:%02d",
+				d.toHours(),
+				d.toMinutesPart(),
+				d.toSecondsPart());
+
+		JOptionPane.showMessageDialog(null,
+				"¡Ganó! En una duración de juego de " + duracionJuego,
+				"¡Ganaste!",
+				JOptionPane.INFORMATION_MESSAGE);
+
+		//Se inhabilita el botón para chequear solución
+		btnChequearSolucion.setEnabled(false);
+
+		estadoDelJuego.setText("¡Ganaste! con un tiempo de " + duracionJuego);
+
+		//Se inhabilitan las celdas del juego.
+		for(Component c : tableroPanel.getComponents()) {
+			JPanel subPanel = (JPanel) c;
 
 			for(Component label : subPanel.getComponents()){
 				LabelCelda labelCelda = (LabelCelda) label;
 
-				if(!labelCelda.getCeldaAsociada().esValida()) {
-					labelCelda.setBackground(Color.RED);
-					estanCeldasMarcadas = true;
-				} else{
-					labelCelda.setBackground(Color.WHITE);
-				}
+				labelCelda.setBackground(Color.DARK_GRAY);
+				labelCelda.removeMouseListener(labelCelda.getMouseListeners()[0]);
 
+				labelCelda.setOpaque(true);
 				labelCelda.repaint();
 			}
 		}
-	}
-	
-	public void inicializarPanelBotones() {
-		panelBotones = new JPanel();
-		panelBotones.setLayout(new FlowLayout());
-
-		JLabel mensajeSaludo = new JLabel("Bienvenido al sudoku");
-
-		JButton btnReiniciarJuego = new JButton("Reiniciar");
-		JButton btnChequearSolucion = new JButton("Chequear solución");
-		
-		btnChequearSolucion.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-
-				if(juego.gano()) {
-					Duration d = cronometro.parar();
-
-					String hora_ = String.format("%02d:%02d:%02d",
-							d.toHours(),
-							d.toMinutesPart(),
-							d.toSecondsPart());
-
-					JOptionPane.showMessageDialog(null,
-							"¡Ganó! En una duración de juego de " + hora_,
-							"¡Ganaste!",
-							JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					marcarCeldasInvalidas();
-				}
-
-
-
-			}
-		});
-
-		panelBotones.add(mensajeSaludo);
-		panelBotones.add(btnReiniciarJuego);
-		panelBotones.add(btnChequearSolucion);
 	}
 
 }

@@ -1,23 +1,26 @@
 package Logica;
 
+/**
+ * Clase Celda. Representa una celda de un tablero de Sudoku de una partida determinada.
+ * Con valores del 1 al 9, y el valor 0 (cero) que representa una celda vacía.
+ */
 public class Celda {
 	
 	private int valor;
-	private Grafico img;
+	private AyudanteGraficoCelda img;
+
+	//Una elda es invalida si no permite la resolución del juego.
 	private boolean validez;
-	
-	//Los cuadrantes se numeran por fila, de izq a der,
-	//comenzando con la fila de arriba, quedando
-	/* 
-	 * 1 / 2 / 3 
-	 * 4 / 5 / 6
-	 * 7 / 8 / 9
+
+	/**
+	 * Inicializa una celda de Sudoku con el numero pasado por parametro.
+	 * La celda se inicializa junto con su ayudante gráfico, y se supone
+	 * válida.
+	 * @param numEnCelda numero en la celda
 	 */
-	//private int cuadrante;
-	
 	public Celda(int numEnCelda) {
 		this.valor = numEnCelda;
-		this.img = new Grafico(numEnCelda);
+		this.img = new AyudanteGraficoCelda(numEnCelda);
 		validez = true;
 	}
 	
@@ -25,7 +28,7 @@ public class Celda {
 		return valor;
 	}
 
-	public Grafico getGrafico(){
+	public AyudanteGraficoCelda getGrafico(){
 		return this.img;
 	}
 	
@@ -36,7 +39,11 @@ public class Celda {
 	public void setValidez(boolean validez) {
 		this.validez = validez;
 	}
-	
+
+	/**
+	 * Actualiza el valor de la celda. Si el valor anterior era menor a 9, se suma uno al numero.
+	 * De lo contrario, se regresa a 0 (cero).
+	 */
 	public void actualizarValor() {
 		valor = ((valor+1)%10);
 		this.img.actualizar(valor);
