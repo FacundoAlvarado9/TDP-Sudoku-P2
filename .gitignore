@@ -1,7 +1,8 @@
 /bin/
-/.idea/
+/.idea
 /.settings/
 src/META-INF/
 
 .project
+*.iml
 .classpath
