@@ -1,6 +1,7 @@
 /bin/
+/.idea/
+/.settings/
+src/META-INF/
+
 .project
 .classpath
-/.settings/
-*.jar
-src/META-INF/

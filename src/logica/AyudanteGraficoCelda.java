@@ -1,8 +1,10 @@
-package Logica;
+package logica;
 
 import GUI.AyudanteGrafico;
 
 import javax.swing.*;
+import java.io.File;
+import java.net.URL;
 
 public class AyudanteGraficoCelda implements AyudanteGrafico {
 

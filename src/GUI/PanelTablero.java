@@ -1,7 +1,7 @@
 package GUI;
 import javax.swing.JPanel;
 
-import Logica.Juego;
+import logica.Juego;
 
 public class PanelTablero extends JPanel{
 	

@@ -1,5 +1,8 @@
-package Logica;
+package logica;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Random;
 import java.io.*;
@@ -7,7 +10,6 @@ import java.io.*;
 public class Juego {
 		
 	private static final int TAMANO_TABLERO = 9;
-	private static final String ARCHIVO_ORIGEN = "/home/facundo/devstuff/sudoku1.txt";
 
 	private Celda[][] tablero;
 
@@ -19,15 +21,16 @@ public class Juego {
 	 * */
 	private int[] auxCantApariciones;
 	
-	private Random rand;
-	private boolean juegoFinalizado;
+	private Random randomVaciamientoAleatorioDeCeldas;
 
 	/**
 	 * Inicializa un juego de Sudoku.
 	 */
-	public Juego() {
+	public Juego() throws ArchivoInvalidoException {
 
 		tablero = new Celda[TAMANO_TABLERO][TAMANO_TABLERO];
+
+		randomVaciamientoAleatorioDeCeldas = new Random();
 
 		//Se inicializa la estructura auxiliar para los chequeos.
 		auxCantApariciones = new int[TAMANO_TABLERO];
@@ -35,12 +38,8 @@ public class Juego {
 			auxCantApariciones[i] = 0;
 		}
 		
-	
-		rand = new Random();
-		
 		cargarTablero();
 
-		juegoFinalizado = false;
 		horaComienzo = LocalTime.now();
 	}
 	
@@ -54,42 +53,54 @@ public class Juego {
 	 * A partir de un archivo, inicializa el tablero de Sudoku. Posteriormente, se chequea si es una
 	 * solución Sudoku-válida. La estructura del archivo se supone válida.
 	 */
-	private void cargarTablero() {
-		String[] lineaNum;
+	private void cargarTablero() throws ArchivoInvalidoException {
+
+		//Para la apertura del archivo
+		URL locacionArchivoEnCarpetaRecursos;
+		File archivoOrigen;
+
+		//Para la lectura e incializacion del tablero
+		String[] lineaDeNumerosArchivo;
 		int fila = 0;
 		int numAInsertarEnCelda;
 
-		int auxRandom;
+		int auxRandom; //random auxiliar para vaciar celdas aleatoriamente
 		
 		//Llenamos el tablero de los digitos en el archivo de texto
-		try {			
-			FileReader fr = new FileReader(ARCHIVO_ORIGEN);
+		try {
+
+			FileReader fr = new FileReader("src/resources/fuente_juego.txt");
 			BufferedReader br = new BufferedReader(fr);			
 			String str;
 			
 			while((str = br.readLine()) != null) {
-				lineaNum = str.split(" ");
+				lineaDeNumerosArchivo = str.split(" ");
 				
-				for(int i=0; i<9; i++) {
-					//genero un random para el vaciamiento aleatorio de celdas
-					auxRandom = rand.nextInt();
+				for(int col=0; col<9; col++) {
+
+					//inicializo el random para el vaciamiento aleatorio de celdas
+					auxRandom = randomVaciamientoAleatorioDeCeldas.nextInt();
+
 					if(auxRandom%3 == 0){
 						numAInsertarEnCelda = 0;
 					} else{
-						numAInsertarEnCelda = Integer.valueOf(lineaNum[i]);
+						numAInsertarEnCelda = Integer.valueOf(lineaDeNumerosArchivo[col]);
 					}
-					tablero[fila][i] = new Celda(numAInsertarEnCelda);
+
+					tablero[fila][col] = new Celda(numAInsertarEnCelda);
 				}
 				
 				fila++;
 			}			
 			
 			br.close();
+
 		} catch(IOException e) {
 			e.printStackTrace();
+			throw new ArchivoInvalidoException();
 		}
 
-		
+
 	}
 
 	/**
@@ -108,14 +119,6 @@ public class Juego {
 	 */
 	public LocalTime getTimeInicio() {
 		return horaComienzo;
-	}
-
-	/**
-	 * Verifica si el juego ha finalizado.
-	 * @return Verdadero si el juego ha sido ganado. Falso en caso contrario.
-	 */
-	public boolean estaFinalizado(){
-		return juegoFinalizado;
 	}
 
 	/**
@@ -281,12 +284,8 @@ public class Juego {
 
 		refrescarValidezCeldas(); //Marco todas las celdas como validas, para deshacer chequeos anteriores.
 
-		//No hace "y" exclusivo porque realizo todos los chequeos, siempre, para marcar todas las celdas invalidas.
+		//No hace "y" exclusivo porque necesito realizar todos los chequeos para marcar las celdas invalidas.
 		gano = chequearFilas() & chequearColumnas() & chequearCuadrantes();
-
-		if(gano){
-			juegoFinalizado = true;
-		}
 
 		return gano;
 	}

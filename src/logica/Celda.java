@@ -1,4 +1,4 @@
-package Logica;
+package logica;
 
 /**
  * Clase Celda. Representa una celda de un tablero de Sudoku de una partida determinada.

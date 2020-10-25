@@ -7,8 +7,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import GUI.Cronometro.Cronometro;
-import Logica.Celda;
-import Logica.Juego;
+import logica.ArchivoInvalidoException;
+import logica.Celda;
+import logica.Juego;
 
 public class GUI extends JFrame {
 
@@ -65,7 +66,6 @@ public class GUI extends JFrame {
 
 		contentPane.add(tableroPanel, BorderLayout.CENTER);
 		contentPane.add(cronometro, BorderLayout.NORTH);
-		//contentPane.add(panelCronometro2, BorderLayout.NORTH);
 		contentPane.add(panelBotones, BorderLayout.SOUTH);
 	}
 
@@ -120,7 +120,6 @@ public class GUI extends JFrame {
 			public void actionPerformed(ActionEvent actionEvent) {
 				iniciarJuego();
 				btnIniciarFinalizarJuego.setEnabled(false);
-				btnChequearSolucion.setEnabled(true);
 			}
 		});
 
@@ -148,39 +147,47 @@ public class GUI extends JFrame {
 	 */
 	private void iniciarJuego(){
 
-		juego = new Juego();
+		try {
+			juego = new Juego();
 
-		//Para cada fila y columna del tablero gráfico
-		for(int fila=0; fila<9; fila++) {
-			for(int col=0; col<9; col++) {
+			//Para cada fila y columna del tablero gráfico
+			for(int fila=0; fila<9; fila++) {
+				for(int col=0; col<9; col++) {
 
-				Celda cel = juego.getCelda(fila, col); //Recupera la celda del juego correspondiente
-				ImageIcon grafico = cel.getGrafico().getImagen();
+					Celda cel = juego.getCelda(fila, col); //Recupera la celda del juego correspondiente
+					ImageIcon grafico = cel.getGrafico().getImagen();
 
-				LabelCelda labelCelda = new LabelCelda(cel); //Inicializa una celda gráfica en la GUI
+					LabelCelda labelCelda = new LabelCelda(cel); //Inicializa una celda gráfica en la GUI
 
-				//A la hora de actualizar la celda, chequea el marcado gráfico de celdas invalidas. Si están marcadas,
-				//las desmarca.
-				labelCelda.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						if(estanCeldasMarcadas){
-							desmarcarCeldasInvalidas();
+					//A la hora de actualizar la celda, chequea el marcado gráfico de celdas invalidas. Si están marcadas,
+					//las desmarca.
+					labelCelda.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							if(estanCeldasMarcadas){
+								desmarcarCeldasInvalidas();
+							}
 						}
-					}
-				});
+					});
 
-				int filaSubPanel = computarFilaOColumnaSubPanel(fila);
-				int colSubPanel = computarFilaOColumnaSubPanel(col);
+					int filaSubPanel = computarFilaOColumnaSubPanel(fila);
+					int colSubPanel = computarFilaOColumnaSubPanel(col);
 
-				subPanel[filaSubPanel][colSubPanel].add(labelCelda);
+					subPanel[filaSubPanel][colSubPanel].add(labelCelda);
 
+				}
 			}
-		}
-		tableroPanel.revalidate();
-		cronometro.arrancar(juego.getTimeInicio());
+			tableroPanel.revalidate();
+			cronometro.arrancar(juego.getTimeInicio());
 
-		estadoDelJuego.setText("Juego en curso ");
+			estadoDelJuego.setText("Juego en curso ");
+			btnChequearSolucion.setEnabled(true);
+
+		} catch (ArchivoInvalidoException e) {
+			JOptionPane.showMessageDialog(null,
+					"Hubo un problema al iniciar el Sudoku.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	/**
@@ -251,7 +258,7 @@ public class GUI extends JFrame {
 		Duration d = cronometro.parar();
 
 		String duracionJuego = String.format("%02d:%02d:%02d",
-				d.toHours(),
+				d.toHoursPart(),
 				d.toMinutesPart(),
 				d.toSecondsPart());
 

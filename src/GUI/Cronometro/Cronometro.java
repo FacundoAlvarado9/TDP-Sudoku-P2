@@ -60,8 +60,6 @@ public class Cronometro extends JPanel {
                         d.toMinutesPart(),
                         d.toSecondsPart());
 
-                System.out.println(hora_);
-
                 segundos.actualizarDigito(d.toSecondsPart());
                 segundos.redimensionar();
 

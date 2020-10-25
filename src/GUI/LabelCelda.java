@@ -2,7 +2,7 @@ package GUI;
 
 import javax.swing.*;
 
-import Logica.Celda;
+import logica.Celda;
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
